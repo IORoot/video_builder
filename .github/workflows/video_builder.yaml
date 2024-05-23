@@ -15,25 +15,15 @@ name: Batch Video Builder
 on:
     # Via a webhook
     repository_dispatch:
-        types: [gdrive_batch_process]
+        types: [video_builder]
 
     workflow_dispatch:
 
 env:
-    # ╭──────────────────────────────────────────────────────────╮
-    # │           Update Video Sheet with full new row           │
-    # │                   including video_url                    │
-    # ╰──────────────────────────────────────────────────────────╯
-    # Google AppsScript Name: "Make.com Video Sheet Insert Row"
-    # INSERT
-    APPS_SCRIPT: ${{ secrets.APPS_SCRIPT }}
 
     # ╭──────────────────────────────────────────────────────────╮
-    # │                  Google Drive Variables                  │
+    # │                       Variables                          │
     # ╰──────────────────────────────────────────────────────────╯
-    GDRIVE_SOURCE_FOLDER: "/SocialExporter/batch_queue"
-    GDRIVE_TARGET_FOLDER: "/SocialExporter/videos/batch_processed"
-    GDRIVE_ARCHIVE_FOLDER: "/SocialExporter/batch_archive"
     CONFIG_FILE_NAME: "config.json"
 
     # ╭──────────────────────────────────────────────────────────╮
