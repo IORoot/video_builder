@@ -29,8 +29,6 @@ jobs:
         steps:
 
           - name: set payload
-            env:
-              CONFIG: 
             run: echo $CONFIG | base64 --decode > config.json
 
           - name: Print decoded payload
