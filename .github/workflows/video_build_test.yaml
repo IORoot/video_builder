@@ -7,8 +7,9 @@ on:
 
 jobs:
     run_test:
+        if: ${{ github.event.client_payload.ffmpeg_control_config }}
         runs-on: ubuntu-latest
         steps:
-            - name: run test
-              run: |
-                  echo "hello"
+          - env:
+              CONFIG: ${{ github.event.client_payload.ffmpeg_control_config }}
+            run: echo $CONFIG
