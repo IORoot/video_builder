@@ -11,6 +11,7 @@ env:
   # │                       Variables                          │
   # ╰──────────────────────────────────────────────────────────╯
   CONFIG: ${{ github.event.client_payload.pppff_control_config_b64 }}
+  REPEAT: ${{ github.event.client_payload.pppff_repeats }}
   SERVER: "media.londonparkour.com"
   TARGET_ROOT_FOLDER: "/var/www/vhosts/media.londonparkour.com/processed/batch_processed"
 
