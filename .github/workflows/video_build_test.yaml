@@ -18,10 +18,9 @@ on:
         types: [video_builder_test]
 
 jobs:
-    create_matrix:
+    run_test:
         runs-on: ubuntu-latest
         steps:
-            - name: install dependencies
+            - name: run test
               run: |
-                  sudo apt-get update 
-                  sudo apt-get install --no-install-recommends jq
+                  echo "hello"
