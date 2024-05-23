@@ -5,15 +5,32 @@ on:
     repository_dispatch:
         types: [video_builder_test]
 
+env:
+
+  # ╭──────────────────────────────────────────────────────────╮
+  # │                       Variables                          │
+  # ╰──────────────────────────────────────────────────────────╯
+  CONFIG: ${{ github.event.client_payload.pppff_control_config_b64 }}
+  SERVER: "media.londonparkour.com"
+  TARGET_ROOT_FOLDER: "/var/www/vhosts/media.londonparkour.com/processed/batch_processed"
+
+  # NCS - No Copyright Sounds - Electronic Copyright Free - NCS Arcade. (Has vocals)
+  # https://www.youtube.com/playlist?list=PLRBp0Fe2GpglvwYma4hf0fJy0sWaNY_CL
+
+  # RFM - Royalty Free Music - EDM Music (Has vocals)
+  # https://www.youtube.com/playlist?list=PLmurGgZIgor4a3gO1_L8OyR89sJW5g6Vz
+
+  # HipHop & Rap Music - Audio Library
+  YOUTUBE_AUDIO_PLAYLIST: "https://www.youtube.com/playlist?list=PLzCxunOM5WFKNv_NaoVO6DWNkR3K8K9WC"
+
 jobs:
     run_test:
-        if: ${{ github.event.client_payload.ffmpeg_control_config_b64 }}
         runs-on: ubuntu-latest
         steps:
 
           - name: set payload
             env:
-              CONFIG: ${{ github.event.client_payload.ffmpeg_control_config_b64 }}
+              CONFIG: 
             run: echo $CONFIG | base64 --decode > config.json
 
           - name: Print decoded payload
