@@ -10,11 +10,11 @@ jobs:
         if: ${{ github.event.client_payload.ffmpeg_control_config_b64 }}
         runs-on: ubuntu-latest
         steps:
-          
+
           - name: set payload
             env:
               CONFIG: ${{ github.event.client_payload.ffmpeg_control_config_b64 }}
-            run: echo $CONFIG | | base64 --decode > config.json
+            run: echo $CONFIG | base64 --decode > config.json
 
           - name: Print decoded payload
             run: |
