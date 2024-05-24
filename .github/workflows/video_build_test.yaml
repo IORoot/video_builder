@@ -50,45 +50,41 @@ jobs:
               ffprobe -version
               yt-dlp --version
               rclone --version
-              ff_text.sh
 
 
+    # ╭───────────────────────────────────────────────────────────────────────────╮
+    # │       Using the 'repeat' value, create a matrix to run in parallel        │
+    # ╰───────────────────────────────────────────────────────────────────────────╯
+    create_matrix:
+        runs-on: ubuntu-latest
+        container:
+          image: ioroot1/video_builder:latest
 
-    # create_matrix:
-    #     runs-on: ubuntu-latest
-    #     outputs:
-    #         matrix: ${{ steps.set-matrix.outputs.matrix }}
-    #     steps:
-    #         - name: install dependencies
-    #           run: |
-    #               sudo apt-get update 
-    #               sudo apt-get install --no-install-recommends jq
+        outputs:
+            matrix: ${{ steps.set-matrix.outputs.matrix }}
+        steps:
+            - id: set-matrix
+              run: |
+                  printf "matrix={\"include\":[" > ./matrix_file.txt
+                  for ((i=0; i<REPEAT; i++)); do printf "{\"project\":\"config.json\"}," >> ./matrix_file.txt; done
+                  printf "]}" >> ./matrix_file.txt
+                  cat ./matrix_file.txt >> $GITHUB_OUTPUT
 
-    #         - name: rclone
-    #           uses: wei/rclone@v1
-    #           env:
-    #               RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
-    #           with:
-    #               args: lsf GDrive:${GDRIVE_SOURCE_FOLDER} | tr -d '//' | head -n 20 > ./folderlist.txt
-
-    #         - id: set-matrix
-    #           run: |
-    #               printf "matrix={\"include\":[" > ./matrix_file.txt
-    #               cat ./folderlist.txt | while read LINE; do printf "{\"project\":\"%s\"}," $LINE >> ./matrix_file.txt ;done
-    #               printf "]}" >> ./matrix_file.txt
-    #               cat ./matrix_file.txt >> $GITHUB_OUTPUT
         
-    # run_ffmpeg:
-    #     needs: create_matrix
-    #     runs-on: ubuntu-latest
-    #     continue-on-error: true
-    #     strategy:
-    #         fail-fast: false
-    #         matrix: ${{ fromJSON(needs.create_matrix.outputs.matrix) }}
-    #     steps:
-    #         - name: Matrix Echo
-    #           run: |
-    #               echo ${{ matrix.project }}
+    run_ffmpeg:
+        needs: create_matrix
+        runs-on: ubuntu-latest
+        container:
+          image: ioroot1/video_builder:latest
+
+        continue-on-error: true
+        strategy:
+            fail-fast: false
+            matrix: ${{ fromJSON(needs.create_matrix.outputs.matrix) }}
+        steps:
+            - name: Matrix Echo
+              run: |
+                  echo ${{ matrix.project }}
 
     #         - name: install dependencies
     #           run: |

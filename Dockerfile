@@ -34,5 +34,8 @@ RUN git clone https://github.com/IORoot/ffmpeg__bash-scripts.git && \
     mv ffmpeg__bash-scripts/* . && \
     rm -Rf ffmpeg__bash-scripts/
 
+# Change to home directory
+WORKDIR /root
+
 # Keep the Container Running
 CMD ["sh", "-c", "while :; do sleep 2073600; done"]
