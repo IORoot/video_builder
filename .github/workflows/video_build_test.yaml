@@ -26,32 +26,6 @@ env:
 
 jobs:
 
-    # ╭───────────────────────────────────────────────────────╮
-    # │  Test run that checks that a config file is being sent  │
-    # ╰───────────────────────────────────────────────────────╯
-    run_test:
-        runs-on: ubuntu-latest
-        
-        container:
-            image: ioroot1/video_builder:latest
-
-        steps:
-
-          - name: set payload
-            run: echo $CONFIG | base64 --decode > config.json
-
-          - name: Print decoded payload
-            run: |
-              cat config.json
-
-          - name: versions
-            run: |
-              ffmpeg -version
-              ffprobe -version
-              yt-dlp --version
-              rclone --version
-
-
     # ╭───────────────────────────────────────────────────────────────────────────╮
     # │       Using the 'repeat' value, create a matrix to run in parallel        │
     # ╰───────────────────────────────────────────────────────────────────────────╯
@@ -108,10 +82,11 @@ jobs:
             # export PATH to allow shell variables become environment variable for subshells to work.
             - name: Run ScriptFlow
               run: |
+                  whoami
                   cd ${GITHUB_WORKSPACE}
                   mkdir -p ${GITHUB_WORKSPACE}/processed_video
                   export PATH=$PATH:$(pwd)
-                  sudo PROJECT="${{ matrix.project }}" scriptflow.sh --config $(realpath ./config.json) -t
+                  PROJECT="${{ matrix.project }}" scriptflow.sh --config $(realpath ./config.json) -t
                   [ ! -f output.mp4 ] || mv output.mp4 ${GITHUB_WORKSPACE}/processed_video
                   [ ! -f ff_thumbnail-01.png ] || mv ff_thumbnail-01.png ${GITHUB_WORKSPACE}/processed_video/thumbnail.png
                   ls -la
