@@ -4,6 +4,7 @@ RUN apt-get update
 
 # Dependencies
 RUN apt-get install --no-install-recommends -y \
+    bc              \
     jq              \
     rclone          \
     ssh             \

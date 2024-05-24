@@ -100,11 +100,11 @@ jobs:
             # │    open-source license-free youtube channel using     │
             # │                one of their playlists.                │
             # ╰───────────────────────────────────────────────────────╯
-            - name: Download Music
-              continue-on-error: true
-              run: |
-                  cd ${GITHUB_WORKSPACE}/processed_video
-                  yt-dlp ${{ env.YOUTUBE_AUDIO_PLAYLIST }} --playlist-random --max-downloads 1 --restrict-filenames --trim-filenames 20 --extract-audio --audio-format mp3 --postprocessor-args "-ss 00:00:00.00 -t 00:01:00.00" --output music.mp3 --force-overwrites || true
+            # - name: Download Music
+            #   continue-on-error: true
+            #   run: |
+            #       cd ${GITHUB_WORKSPACE}/processed_video
+            #       yt-dlp ${{ env.YOUTUBE_AUDIO_PLAYLIST }} --playlist-random --max-downloads 1 --restrict-filenames --trim-filenames 20 --extract-audio --audio-format mp3 --postprocessor-args "-ss 00:00:00.00 -t 00:01:00.00" --output music.mp3 --force-overwrites || true
 
 
             # ╭───────────────────────────────────────────────────────╮
