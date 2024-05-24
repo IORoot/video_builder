@@ -50,6 +50,7 @@ jobs:
               ffprobe -version
               yt-dlp --version
               rclone --version
+              ff_text.sh
 
 
 
