@@ -63,8 +63,14 @@ jobs:
         outputs:
             matrix: ${{ steps.set-matrix.outputs.matrix }}
         steps:
+            - name: Checkout Repo
+              uses: actions/checkout@v3
+
             - id: set-matrix
               run: |
+                  pwd
+                  ls -la
+                  ./.github/workflows/scripts/build_matrix.sh
                   printf "matrix={\"include\":[" > ./matrix_file.txt
                   for ((i=0; i<REPEAT; i++)); do printf "{\"project\":\"config.json\"}," >> ./matrix_file.txt; done
                   printf "]}" >> ./matrix_file.txt
