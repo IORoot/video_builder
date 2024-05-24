@@ -30,7 +30,8 @@ jobs:
     # │  Test run that checks that a config file is being sent  │
     # ╰───────────────────────────────────────────────────────╯
     run_test:
-        runs-on: ubuntu
+        runs-on: ubuntu-latest
+        
         container:
             image: ioroot1/video_builder:latest
 
