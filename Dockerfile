@@ -35,6 +35,10 @@ RUN git clone https://github.com/IORoot/ffmpeg__bash-scripts.git && \
     mv ffmpeg__bash-scripts/* . && \
     rm -Rf ffmpeg__bash-scripts/
 
+COPY scripts /tmp/scripts
+RUN cp /tmp/scripts/* /usr/local/bin/ && \
+    rm -Rf /tmp/scripts
+
 # Change to home directory
 WORKDIR /root
 
