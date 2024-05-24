@@ -69,10 +69,14 @@ jobs:
               run: |
                   echo $CONFIG | base64 --decode > config.json
 
-    #         #   # SSH ----------------------
-    #         # - name: Setup upterm session
-    #         #   uses: lhotari/action-upterm@v1
-    #         #   # SSH ----------------------
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │     DEBUGGER - Use to SSH into the Github Runner      │
+            # ╰───────────────────────────────────────────────────────╯
+            #   # SSH ----------------------
+            # - name: Setup upterm session
+            #   uses: lhotari/action-upterm@v1
+            #   # SSH ----------------------
 
 
             # ╭───────────────────────────────────────────────────────╮
@@ -82,7 +86,6 @@ jobs:
             # export PATH to allow shell variables become environment variable for subshells to work.
             - name: Run ScriptFlow
               run: |
-                  whoami
                   cd ${GITHUB_WORKSPACE}
                   mkdir -p ${GITHUB_WORKSPACE}/processed_video
                   export PATH=$PATH:$(pwd)
@@ -92,23 +95,30 @@ jobs:
                   ls -la
                   ls -la ${GITHUB_WORKSPACE}/processed_video
 
-    #         - name: download music
-    #           continue-on-error: true
-    #           run: |
-    #               cd ${GITHUB_WORKSPACE}/processed_video
-    #               sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o ./yt-dlp
-    #               sudo chmod a+rx ./yt-dlp
-    #               sudo ./yt-dlp ${{ env.YOUTUBE_AUDIO_PLAYLIST }} --playlist-random --max-downloads 1 --restrict-filenames --trim-filenames 20 --extract-audio --audio-format mp3 --postprocessor-args "-ss 00:00:00.00 -t 00:01:00.00" --output music.mp3 --force-overwrites || true
+            # ╭───────────────────────────────────────────────────────╮
+            # │    Use yt-dlp to randomly download a video from an    │
+            # │    open-source license-free youtube channel using     │
+            # │                one of their playlists.                │
+            # ╰───────────────────────────────────────────────────────╯
+            - name: Download Music
+              continue-on-error: true
+              run: |
+                  cd ${GITHUB_WORKSPACE}/processed_video
+                  yt-dlp ${{ env.YOUTUBE_AUDIO_PLAYLIST }} --playlist-random --max-downloads 1 --restrict-filenames --trim-filenames 20 --extract-audio --audio-format mp3 --postprocessor-args "-ss 00:00:00.00 -t 00:01:00.00" --output music.mp3 --force-overwrites || true
 
-    #         - name: overlay music
-    #           continue-on-error: true
-    #           run: |
-    #               cd ${GITHUB_WORKSPACE}/processed_video
-    #               sudo ffmpeg -i output.mp4 -i music.mp3 -c:v copy -map 0:v:0 -map 1:a:0 -shortest overlaid_music.mp4
-    #               ls -la ${GITHUB_WORKSPACE}/processed_video
-    #               sudo rm -f ./yt-dlp
-    #               sudo rm -f ./music.mp3
-    #               sudo rm -f ./output.mp4
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │   Overlay the random downloaded music on top of the   │
+            # │           Created video using ffmpeg again.           │
+            # ╰───────────────────────────────────────────────────────╯
+            - name: Overlay Music
+              continue-on-error: true
+              run: |
+                  cd ${GITHUB_WORKSPACE}/processed_video
+                  ffmpeg -i output.mp4 -i music.mp3 -c:v copy -map 0:v:0 -map 1:a:0 -shortest overlaid_music.mp4
+                  ls -la ${GITHUB_WORKSPACE}/processed_video
+                  rm -f ./music.mp3
+                  rm -f ./output.mp4
 
     #         - name: reformat for instagram
     #           run: |
