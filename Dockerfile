@@ -29,8 +29,10 @@ RUN curl --insecure -L https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-
     chmod +x /usr/local/bin/ffprobe
 
 # FFMPEG Bash Scripts
-WORKDIR /opt
-RUN git clone https://github.com/IORoot/ffmpeg__bash-scripts.git
+WORKDIR /usr/local/bin
+RUN git clone https://github.com/IORoot/ffmpeg__bash-scripts.git && \
+    mv ffmpeg__bash-scripts/* . && \
+    rm -Rf ffmpeg__bash-scripts/
 
 # Keep the Container Running
 CMD ["sh", "-c", "while :; do sleep 2073600; done"]
