@@ -30,7 +30,9 @@ jobs:
     # │  Test run that checks that a config file is being sent  │
     # ╰───────────────────────────────────────────────────────╯
     run_test:
-        runs-on: ioroot1/video_builder:latest
+        container:
+            image: ioroot1/video_builder:latest
+
         steps:
 
           - name: set payload
