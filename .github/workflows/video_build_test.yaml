@@ -71,7 +71,9 @@ jobs:
                   ./.github/workflows/scripts/build_matrix.sh
                   cat ./matrix_file.txt >> $GITHUB_OUTPUT
 
-        
+    # ╭───────────────────────────────────────────────────────────────────────────╮
+    # │        Use the video_builder image and start-up the FFMPEG scripter       │
+    # ╰───────────────────────────────────────────────────────────────────────────╯
     run_ffmpeg:
         needs: create_matrix
         runs-on: ubuntu-latest
@@ -79,62 +81,41 @@ jobs:
           image: ioroot1/video_builder:latest
 
         continue-on-error: true
+
         strategy:
             fail-fast: false
+            # Use the matrix from the previous job to spin-up multiple runners
             matrix: ${{ fromJSON(needs.create_matrix.outputs.matrix) }}
         steps:
-            - name: Matrix Echo
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │         Output the config for debug purposes           │
+            # ╰───────────────────────────────────────────────────────╯
+            - name: Create Config.json
               run: |
-                  echo ${{ matrix.project }}
-
-    #         - name: install dependencies
-    #           run: |
-    #               sudo apt-get update 
-    #               sudo apt-get install --no-install-recommends rclone ssh sshpass sed
-
-    #         - name: Checkout Repo
-    #           uses: actions/checkout@v3
-
-    #         - name: rclone copy to runner
-    #           uses: wei/rclone@v1
-    #           env:
-    #               RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
-    #           with:
-    #               args: copy GDrive:${{ env.GDRIVE_SOURCE_FOLDER }}/${{ matrix.project }} ./${{ matrix.project }}
-
-    #         - name: read config.json
-    #           run: |
-    #               cd ./${{ matrix.project }}
-    #               if [ ! -f "./config.json" ]; then sudo cp ../.github/workflows/default_config.json ./config.json; fi
-    #               sudo mv ./* ../
-    #               cd ${GITHUB_WORKSPACE}
-    #               cat ./config.json
-
-    #         - uses: FedericoCarboni/setup-ffmpeg@v2
-    #         - name: setup ffmpeg
-    #           run: |
-    #               cd /usr/local/bin
-    #               env
-    #               ln -s /opt/hostedtoolcache/ffmpeg/*/x64/ffmpeg ./ffmpeg
-    #               ln -s /opt/hostedtoolcache/ffmpeg/*/x64/ffprobe ./ffprobe
+                  echo $CONFIG | base64 --decode > config.json
 
     #         #   # SSH ----------------------
     #         # - name: Setup upterm session
     #         #   uses: lhotari/action-upterm@v1
     #         #   # SSH ----------------------
 
-    #         # Use sudo otherwise permissions to /tmp won't work in runner
-    #         # export PATH to allow shell variable become environment variable for subshells to work.
-    #         - name: run ffmpeg template
-    #           run: |
-    #               cd ${GITHUB_WORKSPACE}
-    #               mkdir -p ${GITHUB_WORKSPACE}/processed_video
-    #               export PATH=$PATH:$(pwd)
-    #               sudo PROJECT="${{ matrix.project }}" ./scriptflow.sh --config $(realpath ./config.json) -t
-    #               [ ! -f output.mp4 ] || mv output.mp4 ${GITHUB_WORKSPACE}/processed_video
-    #               [ ! -f ff_thumbnail-01.png ] || mv ff_thumbnail-01.png ${GITHUB_WORKSPACE}/processed_video/thumbnail.png
-    #               ls -la
-    #               ls -la ${GITHUB_WORKSPACE}/processed_video
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │  Run /usr/local/bin/scriptflow.sh with the config.json  │
+            # ╰───────────────────────────────────────────────────────╯
+            # Use sudo otherwise permissions to /tmp won't work in runner
+            # export PATH to allow shell variables become environment variable for subshells to work.
+            - name: Run ScriptFlow
+              run: |
+                  cd ${GITHUB_WORKSPACE}
+                  mkdir -p ${GITHUB_WORKSPACE}/processed_video
+                  export PATH=$PATH:$(pwd)
+                  sudo PROJECT="${{ matrix.project }}" scriptflow.sh --config $(realpath ./config.json) -t
+                  [ ! -f output.mp4 ] || mv output.mp4 ${GITHUB_WORKSPACE}/processed_video
+                  [ ! -f ff_thumbnail-01.png ] || mv ff_thumbnail-01.png ${GITHUB_WORKSPACE}/processed_video/thumbnail.png
+                  ls -la
+                  ls -la ${GITHUB_WORKSPACE}/processed_video
 
     #         - name: download music
     #           continue-on-error: true
