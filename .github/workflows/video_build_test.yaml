@@ -77,12 +77,6 @@ jobs:
               run: |
                   echo $CONFIG | base64 --decode > config.json
 
-            - name: Generate UUID
-              id: generate_uuid
-              run: |
-                UUID=$(openssl rand -hex 6)
-                echo "Generated UUID: $UUID"
-                echo "::set-output name=uuid::$UUID"
 
 
             # ╭───────────────────────────────────────────────────────╮
@@ -92,12 +86,22 @@ jobs:
             # - The filenames for the video and image will be the $UUID_video.mp4 and $UUID_thumbnail.png
             - name: Run ScriptFlow
               run: |
+                  export UUID=$(openssl rand -hex 6)
+                  echo "Generated UUID: $UUID"
+
                   cd ${GITHUB_WORKSPACE}
                   mkdir -p ${GITHUB_WORKSPACE}/processed_video
                   export PATH=$PATH:$(pwd)
                   scriptflow.sh --config $(realpath ./config.json) -t
-                  [ ! -f output.mp4 ] || mv output.mp4 ${GITHUB_WORKSPACE}/processed_video/${{ steps.generate_id.outputs.unique_id }}_video.mp4
-                  [ ! -f ff_thumbnail-01.png ] || mv ff_thumbnail-01.png ${GITHUB_WORKSPACE}/processed_video/${{ steps.generate_id.outputs.unique_id }}_thumbnail.png
+
+                  if [ -f output.mp4 ]; then
+                    mv output.mp4 "${GITHUB_WORKSPACE}/processed_video/${UUID}_video.mp4"
+                  fi
+
+                  if [ -f ff_thumbnail-01.png ]; then
+                    mv ff_thumbnail-01.png "${GITHUB_WORKSPACE}/processed_video/${UUID}_thumbnail.png"
+                  fi
+
                   ls -la
                   ls -la ${GITHUB_WORKSPACE}/processed_video
                   
