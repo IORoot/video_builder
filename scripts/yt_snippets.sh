@@ -41,6 +41,9 @@ usage()
         printf " -c | --count <NUMBER>\n"
         printf "\tNumber of timestamps to return (most watched first).\n\n"
 
+        printf " -d | --duration <NUMBER>\n"
+        printf "\tNumber of timestamps to return (most watched first).\n\n"
+
         exit 1
     fi
 }
@@ -69,6 +72,11 @@ function arguments()
             shift
             ;;
 
+        -t|--duration)
+            DURATION=$2
+            shift
+            shift
+            ;;
 
         -d|--download)
             DOWNLOAD="TRUE"
@@ -100,8 +108,6 @@ function arguments()
 # ╰──────────────────────────────────────────────────────────╯
 function main()
 {
-    # printf "%-80s\n" "🎬 YouTube Snippets - Get the timestamps of most watched parts."
-
     if [ -z "$YOUTUBE_VIDEO_ID" ]; then
         echo "Error: URL is empty. Please provide a valid URL."
         exit 1
@@ -112,8 +118,6 @@ function main()
     # Read the JSON file and parse the top N highest intensity scores with their startMillis values
     TOP_VALUES=$(echo "$JSON_RESPONSE" | jq -r --argjson num "$COUNT" '.items[0].mostReplayed.markers | sort_by(-.intensityScoreNormalized) | .[:$num] | map({startMillis}) | .[] | "\(.startMillis)"')
 
-    # echo $TOP_VALUES
-
     # Create a bash array from the output of jq
     declare -a MILLI_ARRAY
     while read -r startMillis intensityScoreNormalized; do
@@ -122,9 +126,6 @@ function main()
 
     # If -d DOWNLOAD Is not set, escape now.
     if [ -z "$DOWNLOAD" ]; then exit 0; fi
-
-    # Print the top N startMillis values
-    # printf "%s\n" "${MILLI_ARRAY[@]}"
 
     for MILLIS in "${MILLI_ARRAY[@]}"; do
         # Run your command for each millisecond value

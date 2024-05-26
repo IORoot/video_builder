@@ -111,15 +111,17 @@ jobs:
             # │   Overlay the random downloaded music on top of the   │
             # │           Created video using ffmpeg again.           │
             # ╰───────────────────────────────────────────────────────╯
-            - name: Overlay Music
-              continue-on-error: true
-              run: |
-                  cd ${GITHUB_WORKSPACE}/processed_video
-                  ffmpeg -i output.mp4 -i music.mp3 -c:v copy -map 0:v:0 -map 1:a:0 -shortest overlaid_music.mp4
-                  ls -la ${GITHUB_WORKSPACE}/processed_video
-                  rm -f ./music.mp3
-                  rm -f ./output.mp4
+            # - name: Overlay Music
+            #   continue-on-error: true
+            #   run: |
+            #       cd ${GITHUB_WORKSPACE}/processed_video
+            #       ffmpeg -i output.mp4 -i music.mp3 -c:v copy -map 0:v:0 -map 1:a:0 -shortest overlaid_music.mp4
+            #       ls -la ${GITHUB_WORKSPACE}/processed_video
+            #       rm -f ./music.mp3
+            #       rm -f ./output.mp4
 
+
+            
     #         - name: reformat for instagram
     #           run: |
     #               cd ${GITHUB_WORKSPACE}/processed_video
