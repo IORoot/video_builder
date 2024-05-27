@@ -69,13 +69,6 @@ jobs:
             matrix: ${{ fromJSON(needs.create_matrix.outputs.matrix) }}
         steps:
 
-            # ╭───────────────────────────────────────────────────────╮
-            # │         Output the config for debug purposes           │
-            # ╰───────────────────────────────────────────────────────╯
-            - name: Create Config.json
-              run: |
-                  echo $CONFIG | base64 --decode > ${GITHUB_WORKSPACE}/config.json
-
 
 
             # ╭───────────────────────────────────────────────────────╮
@@ -137,6 +130,15 @@ jobs:
 
 
             # ╭───────────────────────────────────────────────────────╮
+            # │         Output the config for debug purposes           │
+            # ╰───────────────────────────────────────────────────────╯
+            - name: Create Config.json
+              run: |
+                  echo $CONFIG | base64 --decode > ${GITHUB_WORKSPACE}/config.json
+
+
+                  
+            # ╭───────────────────────────────────────────────────────╮
             # │  Run /usr/local/bin/scriptflow.sh with the config.json  │
             # ╰───────────────────────────────────────────────────────╯
             # export PATH to allow shell variables become environment variable for subshells to work.
@@ -162,6 +164,14 @@ jobs:
                   ls -la
                   ls -la ${GITHUB_WORKSPACE}/processed_video
                   
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │     DEBUGGER - Use to SSH into the Github Runner      │
+            # ╰───────────────────────────────────────────────────────╯
+              # SSH ----------------------
+            - name: Setup upterm session
+              uses: lhotari/action-upterm@v1
+              # SSH ----------------------
 
                   
             # ╭───────────────────────────────────────────────────────╮
