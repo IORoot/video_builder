@@ -165,14 +165,6 @@ jobs:
                   ls -la ${GITHUB_WORKSPACE}/processed_video
                   
 
-            # ╭───────────────────────────────────────────────────────╮
-            # │     DEBUGGER - Use to SSH into the Github Runner      │
-            # ╰───────────────────────────────────────────────────────╯
-              # SSH ----------------------
-            - name: Setup upterm session
-              uses: lhotari/action-upterm@v1
-              # SSH ----------------------
-
                   
             # ╭───────────────────────────────────────────────────────╮
             # │        Copy the video and thumbnail to server         │
