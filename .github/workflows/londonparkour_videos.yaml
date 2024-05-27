@@ -23,7 +23,7 @@ env:
   RELEASE_TARGET: ${{ github.event.client_payload.pppff_release_rest_api_url }}
   RELEASE_TOKEN: ${{ github.event.client_payload.pppff_release_rest_api_token }}
   RELEASE_SCHEDULE: ${{ github.event.client_payload.pppff_release_schedule }}
-  GDRIVE_FOLDER: ${{ github.event.client_payload.pppff_release_schedule }}
+  GDRIVE_FOLDER: ${{ github.event.client_payload.pppff_google_drive_output_folder }}
   SERVER: "media.londonparkour.com"
   TARGET_ROOT_FOLDER: "/var/www/vhosts/media.londonparkour.com/processed"
   OUTPUT_URL: "http://media.londonparkour.com/processed"
