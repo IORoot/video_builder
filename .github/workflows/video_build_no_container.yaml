@@ -96,8 +96,7 @@ jobs:
             - name: Install Dependencies
               run: |
                 sudo apt-get update 
-                sudo apt-get install --no-install-recommends -y \ 
-                rclone          
+                sudo apt-get install --no-install-recommends rclone          
 
 
 
