@@ -205,21 +205,24 @@ jobs:
 
             # ╭───────────────────────────────────────────────────────╮
             # │       USE RCLONE TO GET FILE_ID OF GDRIVE FILE        │
+            # ╰───────────────────────────────────────────────────────╯
+            - name: get gdrive file_id
+              uses: wei/rclone@v1
+              env:
+                  RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
+              with:
+                  args: lsjson GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 | jq -r '.[].ID' > GDRIVE_FILE_ID
+
+            
+            # ╭───────────────────────────────────────────────────────╮
+            # │       USE RCLONE TO GET FILE_ID OF GDRIVE FILE        │
             # ╰───────────────────────────────────────────────────────╯            
             - name: rclone file_id
               id: rclone_file_id
               run: |
-                  sudo apt-get update 
-                  sudo apt-get install --no-install-recommends rclone
-                  echo "mkdir"
-                  mkdir -p ~/.config/rclone
-                  echo "echo"
-                  echo "${{ secrets.RCLONE_CONF }}" > ~/.config/rclone/rclone.conf
-                  echo "rclone"
-                  GDRIVE_FILE_ID=$(rclone lsjson GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 | jq -r '.[].ID' )
-                  echo "GITHUB_ENV"
-                  echo "GDRIVE_FILE_ID=${GDRIVE_FILE_ID}" >> $GITHUB_ENV
-
+                ls -la
+                cat GDRIVE_FILE_ID
+                echo "UUID=$(cat GDRIVE_FILE_ID)" >> $GITHUB_ENV
 
             # ╭───────────────────────────────────────────────────────╮
             # │                   CREATE A RELEASE                    │
