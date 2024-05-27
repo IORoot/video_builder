@@ -196,7 +196,7 @@ function main()
             \"ppp_release_method\": \"true\",
             \"ppp_release_schedule\": \"${RELEASE_SCHEDULE}\",
             \"ppp_video_url\": \"${VIDEO_URL}\",
-            \"ppp_thumbnail_url\": \"${THUMBNAIL_URL},\"
+            \"ppp_thumbnail_url\": \"${THUMBNAIL_URL}\",
             \"ppp_gdrive_folder\": \"${GDRIVE}\"
         }
     }"
