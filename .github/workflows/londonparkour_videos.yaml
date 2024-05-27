@@ -211,9 +211,13 @@ jobs:
               run: |
                   sudo apt-get update 
                   sudo apt-get install --no-install-recommends rclone
-                  mkdir ~/.config/rclone/
+                  echo "mkdir"
+                  mkdir -p ~/.config/rclone/
+                  echo "echo"
                   echo ${{ secrets.RCLONE_CONF }} >> ~/.config/rclone/rclone.conf
+                  echo "rclone"
                   GDRIVE_FILE_ID=$(rclone lsjson GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 | jq -r '.[].ID' )
+                  echo "GITHUB_ENV"
                   echo "GDRIVE_FILE_ID=$GDRIVE_FILE_ID" >> $GITHUB_ENV
 
 
