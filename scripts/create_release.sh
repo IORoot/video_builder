@@ -186,6 +186,21 @@ function main()
     pre_flight_checks
 
     # curl -X POST https://localhost:8443/wp-json/custom/v1/release \
+    echo curl -X POST ${TARGET} \
+    -H "Content-Type: application/json" \
+    -H "X-API-TOKEN: ${TOKEN}" \
+    -d "{
+        \"title\": \"${RELEASE_TITLE}\",
+        \"content\": \"${RELEASE_CONTENT}\",
+        \"acf\": {
+            \"ppp_release_method\": \"true\",
+            \"ppp_release_schedule\": \"${RELEASE_SCHEDULE}\",
+            \"ppp_video_url\": \"${VIDEO_URL}\",
+            \"ppp_thumbnail_url\": \"${THUMBNAIL_URL},\"
+            \"ppp_gdrive_folder\": \"${GDRIVE}\"
+        }
+    }"
+
     curl -X POST ${TARGET} \
     -H "Content-Type: application/json" \
     -H "X-API-TOKEN: ${TOKEN}" \
