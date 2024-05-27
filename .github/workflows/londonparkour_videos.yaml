@@ -204,13 +204,21 @@ jobs:
 
 
               
+            - name: rclone copy result back to google drive
+              id: rclone_file_id
+              uses: wei/rclone@v1
+              env:
+                  RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
+              with:
+                  args: lsjson GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 | jq -r '.[].ID' | while read -r file_id; do echo "GDRIVE_ID=$file_id" >> $GITHUB_ENV; done
+
+            
             # ╭───────────────────────────────────────────────────────╮
             # │                   CREATE A RELEASE                    │
             # ╰───────────────────────────────────────────────────────╯
             - name: Create a Release
               run: |
-
-                  GDRIVE_ID=$(rclone lsjson GDrive:${{env.GDRIVE_FOLDER}}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 | jq -r '.[].ID')
+                  echo ${GDRIVE_ID}
 
                   create_release.sh \
                   --target ${{env.RELEASE_TARGET}} \
