@@ -6,12 +6,12 @@
 # SSH_PASS
 # SSH_USER
 
-name: Batch Video Builder No Container
+name: LondonParkour Videos
 
 on:
     # Run Via a webhook only
     repository_dispatch:
-        types: [video_builder_no_container]
+        types: [londonparkour_videos]
 
 env:
 
