@@ -220,7 +220,7 @@ jobs:
             # ╰───────────────────────────────────────────────────────╯
             - name: Create a Release
               run: |
-                  echo ${GDRIVE_ID}
+                  echo ${{env.GDRIVE_ID}}
 
                   create_release.sh \
                   --target ${{env.RELEASE_TARGET}} \
