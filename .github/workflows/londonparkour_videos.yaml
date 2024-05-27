@@ -183,7 +183,7 @@ jobs:
               env:
                   RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
               with:
-                  args: copy ./processed_video/* GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/
+                  args: copy ./processed_video GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/
 
 
 
