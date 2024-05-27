@@ -15,7 +15,8 @@ RUN apt-get install --no-install-recommends -y \
     git             \
     xz-utils        \
     ca-certificates  \
-    python3
+    python3         \
+    vim
 
 # YouTube Downloader
 RUN cd /usr/local/bin && \

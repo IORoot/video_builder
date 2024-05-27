@@ -1,0 +1,202 @@
+# ╭───────────────────────────────────────────────────────────────────────────╮
+# │                               REQUIREMENTS                                │
+# ╰───────────────────────────────────────────────────────────────────────────╯
+#
+# Make sure the following variables are set to access your server.
+# SSH_PASS
+# SSH_USER
+
+name: Batch Video Builder Test
+
+on:
+    # Run Via a webhook only
+    repository_dispatch:
+        types: [video_builder_no_container]
+
+env:
+
+  # ╭──────────────────────────────────────────────────────────╮
+  # │                       Variables                          │
+  # ╰──────────────────────────────────────────────────────────╯
+  CONFIG: ${{ github.event.client_payload.pppff_control_config_b64 }}
+  REPEAT: ${{ github.event.client_payload.pppff_repeats }}
+  SERVER: "media.londonparkour.com"
+  TARGET_ROOT_FOLDER: "/var/www/vhosts/media.londonparkour.com/processed"
+
+  # NCS - No Copyright Sounds - Electronic Copyright Free - NCS Arcade. (Has vocals)
+  # https://www.youtube.com/playlist?list=PLRBp0Fe2GpglvwYma4hf0fJy0sWaNY_CL
+
+  # RFM - Royalty Free Music - EDM Music (Has vocals)
+  # https://www.youtube.com/playlist?list=PLmurGgZIgor4a3gO1_L8OyR89sJW5g6Vz
+
+  # HipHop & Rap Music - Audio Library
+  YOUTUBE_AUDIO_PLAYLIST: "https://www.youtube.com/playlist?list=PLzCxunOM5WFKNv_NaoVO6DWNkR3K8K9WC"
+
+jobs:
+
+    # ╭───────────────────────────────────────────────────────────────────────────╮
+    # │       Using the 'repeat' value, create a matrix to run in parallel        │
+    # ╰───────────────────────────────────────────────────────────────────────────╯
+    create_matrix:
+        runs-on: ubuntu-latest
+        container:
+          image: ioroot1/video_builder:latest
+
+        outputs:
+            matrix: ${{ steps.set-matrix.outputs.matrix }}
+        steps:
+            - name: Checkout Repo
+              uses: actions/checkout@v3
+
+            - id: set-matrix
+              run: |
+                  ./.github/workflows/scripts/build_matrix.sh
+                  cat ./matrix_file.txt >> $GITHUB_OUTPUT
+
+    # ╭───────────────────────────────────────────────────────────────────────────╮
+    # │        Use the video_builder image and start-up the FFMPEG scripter       │
+    # ╰───────────────────────────────────────────────────────────────────────────╯
+    run_ffmpeg:
+        needs: create_matrix
+        runs-on: ubuntu-latest
+        # container:
+        #   image: ioroot1/video_builder:latest
+        continue-on-error: true
+
+        strategy:
+            fail-fast: false
+            # Use the matrix from the previous job to spin-up multiple runners
+            matrix: ${{ fromJSON(needs.create_matrix.outputs.matrix) }}
+        steps:
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │         Output the config for debug purposes           │
+            # ╰───────────────────────────────────────────────────────╯
+            - name: Create Config.json
+              run: |
+                  echo $CONFIG | base64 --decode > config.json
+
+
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │             GET CONTENTS OF CURRENT REPO              │
+            # ╰───────────────────────────────────────────────────────╯
+            - name: Checkout Repo
+              uses: actions/checkout@v3
+
+
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │     DEBUGGER - Use to SSH into the Github Runner      │
+            # ╰───────────────────────────────────────────────────────╯
+              # SSH ----------------------
+            - name: Setup upterm session
+              uses: lhotari/action-upterm@v1
+              # SSH ----------------------
+
+
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │                 Configure the runner                   │
+            # ╰───────────────────────────────────────────────────────╯          
+            - name: Install Dependencies
+              run: |
+                sudo apt-get update 
+                sudo apt-get install --no-install-recommends -y \ 
+                bc              \
+                jq              \
+                rclone          \
+                ssh             \
+                sshpass         \
+                sed             \
+                curl            \
+                tar             \
+                git             \
+                xz-utils        \
+                ca-certificates  \
+                python3         \
+                vim
+
+
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │                    INSTALL YT-DLP                     │
+            # ╰───────────────────────────────────────────────────────╯
+            - name: Install YT-DLP
+              continue-on-error: true
+              run: |
+                  sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+                  sudo chmod a+rx /usr/local/bin/yt-dlp
+
+
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │                    Install FFMPEG                     │
+            # ╰───────────────────────────────────────────────────────╯
+            - uses: FedericoCarboni/setup-ffmpeg@v2
+            - name: Install FFMPEG
+              run: |
+                  cd /usr/local/bin
+                  env
+                  ln -s /opt/hostedtoolcache/ffmpeg/*/x64/ffmpeg ./ffmpeg
+                  ln -s /opt/hostedtoolcache/ffmpeg/*/x64/ffprobe ./ffprobe   
+                  
+
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │               INSTALL FFMPEG SCRIPTFLOW               │
+            # ╰───────────────────────────────────────────────────────╯
+            - name: Install Scriptflow
+              continue-on-error: true
+              run: |
+                  sudo git clone https://github.com/IORoot/ffmpeg__bash-scripts.git /tmp/scriptflow
+                  sudo mv /tmp/scriptflow/*.sh /usr/local/bin
+                  sudo chmod +x /usr/local/bin/*
+
+
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │  Run /usr/local/bin/scriptflow.sh with the config.json  │
+            # ╰───────────────────────────────────────────────────────╯
+            # export PATH to allow shell variables become environment variable for subshells to work.
+            # - The filenames for the video and image will be the $UUID_video.mp4 and $UUID_thumbnail.png
+            - name: Run ScriptFlow
+              run: |
+                  export UUID=$(openssl rand -hex 6)
+                  echo "Generated UUID: $UUID"
+
+                  cd ${GITHUB_WORKSPACE}
+                  mkdir -p ${GITHUB_WORKSPACE}/processed_video
+                  export PATH=$PATH:$(pwd)
+                  scriptflow.sh --config $(realpath ./config.json) -t
+
+                  if [ -f output.mp4 ]; then
+                    mv output.mp4 "${GITHUB_WORKSPACE}/processed_video/${UUID}_video.mp4"
+                  fi
+
+                  if [ -f ff_thumbnail-01.png ]; then
+                    mv ff_thumbnail-01.png "${GITHUB_WORKSPACE}/processed_video/${UUID}_thumbnail.png"
+                  fi
+
+                  ls -la
+                  ls -la ${GITHUB_WORKSPACE}/processed_video
+                  
+
+                  
+            # ╭───────────────────────────────────────────────────────╮
+            # │        Copy the video and thumbnail to server         │
+            # ╰───────────────────────────────────────────────────────╯
+            - name: Copy Video to Server
+              run: |
+                  mkdir ~/.ssh
+                  ssh-keyscan -H ${{env.SERVER}} >> ~/.ssh/known_hosts
+
+                  SOURCE_DIR="./processed_video"
+                  TARGET_DIR="${TARGET_ROOT_FOLDER}/${{ github.event.action }}"
+
+                  sshpass -p '${{secrets.SSH_PASS}}' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{secrets.SSH_USER}}@${{env.SERVER}} "mkdir -p ${TARGET_DIR}"
+                  cd ${SOURCE_DIR}
+                  sshpass -p '${{secrets.SSH_PASS}}' scp -v -p -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null * ${{secrets.SSH_USER}}@${{env.SERVER}}:${TARGET_DIR}
+
+
+
