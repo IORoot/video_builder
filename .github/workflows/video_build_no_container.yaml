@@ -6,7 +6,7 @@
 # SSH_PASS
 # SSH_USER
 
-name: LondonParkour Videos
+name: 🎬 LondonParkour Videos
 
 on:
     # Run Via a webhook only
