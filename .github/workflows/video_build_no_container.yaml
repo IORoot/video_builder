@@ -25,7 +25,6 @@ env:
   RELEASE_SCHEDULE: ${{ github.event.client_payload.pppff_release_schedule }}
   SERVER: "media.londonparkour.com"
   TARGET_ROOT_FOLDER: "/var/www/vhosts/media.londonparkour.com/processed"
-  UUID: ""
 
   # NCS - No Copyright Sounds - Electronic Copyright Free - NCS Arcade. (Has vocals)
   # https://www.youtube.com/playlist?list=PLRBp0Fe2GpglvwYma4hf0fJy0sWaNY_CL
@@ -73,13 +72,16 @@ jobs:
             matrix: ${{ fromJSON(needs.create_matrix.outputs.matrix) }}
         steps:
 
+          
 
             # ╭───────────────────────────────────────────────────────╮
             # │             GENERATE A UNIQUE IDENTIFIER              │
             # ╰───────────────────────────────────────────────────────╯
             - name: Generate UUID
               id: generate_uuid
-              run: echo "::set-env name=UUID::$(openssl rand -hex 6)"
+              run: echo "UUID=$(openssl rand -hex 6)" >> $GITHUB_ENV
+
+
 
             # ╭───────────────────────────────────────────────────────╮
             # │             GET CONTENTS OF CURRENT REPO              │
