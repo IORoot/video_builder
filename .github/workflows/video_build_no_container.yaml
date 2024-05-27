@@ -72,7 +72,7 @@ jobs:
             matrix: ${{ fromJSON(needs.create_matrix.outputs.matrix) }}
         steps:
 
-          
+
 
             # ╭───────────────────────────────────────────────────────╮
             # │             GENERATE A UNIQUE IDENTIFIER              │
@@ -154,7 +154,14 @@ jobs:
                   echo $CONFIG | base64 --decode > ${GITHUB_WORKSPACE}/config.json
 
 
-                  
+            # ╭───────────────────────────────────────────────────────╮
+            # │     DEBUGGER - Use to SSH into the Github Runner      │
+            # ╰───────────────────────────────────────────────────────╯
+              # SSH ----------------------
+            - name: Setup upterm session
+              uses: lhotari/action-upterm@v1
+              # SSH ----------------------
+
             # ╭───────────────────────────────────────────────────────╮
             # │  Run /usr/local/bin/scriptflow.sh with the config.json  │
             # ╰───────────────────────────────────────────────────────╯
@@ -209,8 +216,8 @@ jobs:
                   --schedule "${{env.RELEASE_SCHEDULE}}" \
                   --title "" \
                   --content "" \
-                  --video ${{env.SERVER}}:${TARGET_DIR}/${UUID}_video.mp4 \
-                  --thumbnail ${{env.SERVER}}:${TARGET_DIR}/${UUID}_thumbnail.png
+                  --video ${{env.TARGET_ROOT_FOLDER}}/${{ github.event.action }}/${UUID}_video.mp4 \
+                  --thumbnail ${{env.TARGET_ROOT_FOLDER}}/${{ github.event.action }}/${UUID}_thumbnail.png
 
 
 
