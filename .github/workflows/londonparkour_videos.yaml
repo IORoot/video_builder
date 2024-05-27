@@ -149,7 +149,7 @@ jobs:
               run: |
                   echo $CONFIG | base64 --decode > ${GITHUB_WORKSPACE}/config.json
 
-                  
+
               
             # ╭───────────────────────────────────────────────────────╮
             # │  Run /usr/local/bin/scriptflow.sh with the config.json  │
@@ -225,7 +225,7 @@ jobs:
             # ╭───────────────────────────────────────────────────────╮
             # │     DEBUGGER - Use to SSH into the Github Runner      │
             # ╰───────────────────────────────────────────────────────╯
-            #   # SSH ----------------------
-            # - name: Setup upterm session
-            #   uses: lhotari/action-upterm@v1
-            #   # SSH ----------------------
+              # SSH ----------------------
+            - name: Setup upterm session
+              uses: lhotari/action-upterm@v1
+              # SSH ----------------------
