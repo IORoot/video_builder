@@ -37,6 +37,9 @@ usage()
         printf " --content <RELEASE_CONTENT>\n"
         printf "\tContent of the release.\n\n"
 
+        printf " --gdrive <GDRIVE>\n"
+        printf "\tGoogle Drive Folder.\n\n"
+
         printf " --video <VIDEO_URL>\n"
         printf "\tVideo URL.\n\n"
 
@@ -94,6 +97,13 @@ function arguments()
             ;;
 
 
+        --gdrive)
+            GDRIVE="$2"
+            shift 
+            shift
+            ;;
+
+
         --video)
             VIDEO_URL="$2"
             shift 
@@ -146,6 +156,11 @@ function pre_flight_checks()
         exit 1
     fi
 
+    if [[ -z "${GDRIVE+x}" ]]; then 
+        printf "❌ No GDRIVE specified. Exiting.\n"
+        exit 1
+    fi
+
     if [[ -z "${VIDEO_URL+x}" ]]; then 
         printf "❌ No VIDEO_URL specified. Exiting.\n"
         exit 1
@@ -182,6 +197,8 @@ function main()
             \"ppp_release_schedule\": \"${RELEASE_SCHEDULE}\",
             \"ppp_video_url\": \"${VIDEO_URL}\",
             \"ppp_thumbnail_url\": \"${THUMBNAIL_URL}\"
+            \"ppp_thumbnail_url\": \"${THUMBNAIL_URL}\"
+            \"ppp_gdrive_folder\": \"${GDRIVE}\"
         }
     }"
 }
