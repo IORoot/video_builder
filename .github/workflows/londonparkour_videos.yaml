@@ -212,7 +212,7 @@ jobs:
               env:
                   RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
               with:
-                  args: lsjson GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 | jq -r '.[].ID' | while read -r file_id; do echo "GDRIVE_ID=$file_id" >> $GITHUB_ENV; done
+                  args: lsjson GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 | jq -r '.[].ID' | while read -r file_id; do echo "GDRIVE_ID=$file_id" ; done
 
             
             # ╭───────────────────────────────────────────────────────╮
@@ -220,7 +220,7 @@ jobs:
             # ╰───────────────────────────────────────────────────────╯
             - name: Create a Release
               run: |
-                  echo ${{env.GDRIVE_ID}}
+                  echo "${{env.GDRIVE_ID}}"
 
                   create_release.sh \
                   --target ${{env.RELEASE_TARGET}} \
