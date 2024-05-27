@@ -6,7 +6,7 @@
 # SSH_PASS
 # SSH_USER
 
-name: Batch Video Builder Test
+name: Batch Video Builder No Container
 
 on:
     # Run Via a webhook only
@@ -87,35 +87,17 @@ jobs:
 
 
             # ╭───────────────────────────────────────────────────────╮
-            # │     DEBUGGER - Use to SSH into the Github Runner      │
-            # ╰───────────────────────────────────────────────────────╯
-              # SSH ----------------------
-            - name: Setup upterm session
-              uses: lhotari/action-upterm@v1
-              # SSH ----------------------
-
-
-
-            # ╭───────────────────────────────────────────────────────╮
             # │                 Configure the runner                   │
-            # ╰───────────────────────────────────────────────────────╯          
+            # ╰───────────────────────────────────────────────────────╯
+            # Not that most dependencies are already installed on a 
+            # default github action runner. The main dependecies are:
+            #  bc, jq, rclone, ssh, sshpass, sed, curl, tar, git, xz-utils,
+            #  ca-certificates, python3, vim      
             - name: Install Dependencies
               run: |
                 sudo apt-get update 
                 sudo apt-get install --no-install-recommends -y \ 
-                bc              \
-                jq              \
-                rclone          \
-                ssh             \
-                sshpass         \
-                sed             \
-                curl            \
-                tar             \
-                git             \
-                xz-utils        \
-                ca-certificates  \
-                python3         \
-                vim
+                rclone          
 
 
 
@@ -200,3 +182,11 @@ jobs:
 
 
 
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │     DEBUGGER - Use to SSH into the Github Runner      │
+            # ╰───────────────────────────────────────────────────────╯
+            #   # SSH ----------------------
+            # - name: Setup upterm session
+            #   uses: lhotari/action-upterm@v1
+            #   # SSH ----------------------
