@@ -74,7 +74,7 @@ jobs:
             # ╰───────────────────────────────────────────────────────╯
             - name: Create Config.json
               run: |
-                  echo $CONFIG | base64 --decode > config.json
+                  echo $CONFIG | base64 --decode > ${GITHUB_WORKSPACE}/config.json
 
 
 
@@ -87,13 +87,13 @@ jobs:
 
 
             # ╭───────────────────────────────────────────────────────╮
-            # │                 Configure the runner                   │
+            # │                 INSTALL DEPENDENCIES                  │
             # ╰───────────────────────────────────────────────────────╯
             # Not that most dependencies are already installed on a 
             # default github action runner. The main dependecies are:
             #  bc, jq, rclone, ssh, sshpass, sed, curl, tar, git, xz-utils,
             #  ca-certificates, python3, vim      
-            - name: Install Dependencies
+            - name: Install RClone
               run: |
                 sudo apt-get update 
                 sudo apt-get install --no-install-recommends rclone          
