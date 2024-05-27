@@ -203,19 +203,22 @@ jobs:
                   sshpass -p '${{secrets.SSH_PASS}}' scp -v -p -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null * ${{secrets.SSH_USER}}@${{env.SERVER}}:${TARGET_DIR}
 
 
-
+              
             # ╭───────────────────────────────────────────────────────╮
             # │                   CREATE A RELEASE                    │
             # ╰───────────────────────────────────────────────────────╯
             - name: Create a Release
               run: |
+
+                  GDRIVE_ID=$(rclone lsjson GDrive:${{env.GDRIVE_FOLDER}}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 | jq -r '.[].ID')
+
                   create_release.sh \
                   --target ${{env.RELEASE_TARGET}} \
                   --token ${{env.RELEASE_TOKEN}} \
                   --schedule "${{env.RELEASE_SCHEDULE}}" \
                   --title "${{ github.event.action }} - ${UUID}" \
                   --content "" \
-                  --gdrive ${{env.GDRIVE_FOLDER}}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 \
+                  --gdrive ${GDRIVE_ID} \
                   --video ${{env.OUTPUT_URL}}/${{ github.event.action }}/${UUID}_video.mp4 \
                   --thumbnail ${{env.OUTPUT_URL}}/${{ github.event.action }}/${UUID}_thumbnail.png
 
@@ -226,6 +229,6 @@ jobs:
             # │     DEBUGGER - Use to SSH into the Github Runner      │
             # ╰───────────────────────────────────────────────────────╯
             # SSH ----------------------
-            # - name: Setup upterm session
-            #   uses: lhotari/action-upterm@v1
+            - name: Setup upterm session
+              uses: lhotari/action-upterm@v1
             # SSH ----------------------
