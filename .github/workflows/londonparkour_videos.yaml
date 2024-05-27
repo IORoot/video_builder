@@ -219,7 +219,7 @@ jobs:
                   --schedule "${{env.RELEASE_SCHEDULE}}" \
                   --title "${{ github.event.action }} - ${UUID}" \
                   --content "" \
-                  --gdrive ${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 \
+                  --gdrive ${{env.GDRIVE_FOLDER}}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 \
                   --video ${{env.OUTPUT_URL}}/${{ github.event.action }}/${UUID}_video.mp4 \
                   --thumbnail ${{env.OUTPUT_URL}}/${{ github.event.action }}/${UUID}_thumbnail.png
 
