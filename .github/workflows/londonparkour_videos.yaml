@@ -203,7 +203,9 @@ jobs:
                   sshpass -p '${{secrets.SSH_PASS}}' scp -v -p -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null * ${{secrets.SSH_USER}}@${{env.SERVER}}:${TARGET_DIR}
 
 
-              
+            # ╭───────────────────────────────────────────────────────╮
+            # │       USE RCLONE TO GET FILE_ID OF GDRIVE FILE        │
+            # ╰───────────────────────────────────────────────────────╯
             - name: rclone copy result back to google drive
               id: rclone_file_id
               uses: wei/rclone@v1
