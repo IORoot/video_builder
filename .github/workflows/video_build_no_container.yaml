@@ -79,6 +79,7 @@ jobs:
 
 
 
+            # Currently not needed - files copied to server only.
             # ╭───────────────────────────────────────────────────────╮
             # │                 INSTALL DEPENDENCIES                  │
             # ╰───────────────────────────────────────────────────────╯
@@ -86,10 +87,10 @@ jobs:
             # default github action runner. The main dependecies are:
             #  bc, jq, rclone, ssh, sshpass, sed, curl, tar, git, xz-utils,
             #  ca-certificates, python3, vim      
-            - name: Install RClone
-              run: |
-                sudo apt-get update 
-                sudo apt-get install --no-install-recommends rclone          
+            # - name: Install RClone
+            #   run: |
+            #     sudo apt-get update 
+            #     sudo apt-get install --no-install-recommends rclone          
 
 
 
