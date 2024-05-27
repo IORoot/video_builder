@@ -221,8 +221,7 @@ jobs:
               id: rclone_file_id
               run: |
                 ls -la
-                GDRIVE_FILE_ID=$(cat GDRIVE_FILE_META | jq -r '.[].ID')
-                echo "GDRIVE_FILE_ID=$(echo $GDRIVE_FILE_ID" >> $GITHUB_ENV
+                echo "GDRIVE_FILE_ID=$(cat GDRIVE_FILE_META | jq -r '.[].ID' " >> $GITHUB_ENV
 
             # ╭───────────────────────────────────────────────────────╮
             # │                   CREATE A RELEASE                    │
