@@ -183,7 +183,7 @@ jobs:
               env:
                   RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
               with:
-                  args: copy ./processed_video/* GDrive:${GDRIVE_FOLDER}/${{ matrix.project }}/${UUID}/
+                  args: copy ./processed_video/* GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/
 
 
 
@@ -215,8 +215,8 @@ jobs:
                   --schedule "${{env.RELEASE_SCHEDULE}}" \
                   --title "${{ github.event.action }} - ${UUID}" \
                   --content "" \
-                  --video ${{env.OUTPUT_URL}}/${{ github.event.action }}/${UUID}_video.mp4 \
-                  --thumbnail ${{env.OUTPUT_URL}}/${{ github.event.action }}/${UUID}_thumbnail.png
+                  --video ${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 \
+                  --thumbnail ${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/${UUID}_thumbnail.png
 
 
 
