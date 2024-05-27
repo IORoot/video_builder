@@ -211,7 +211,7 @@ jobs:
               env:
                   RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
               with:
-                  args: lsjson GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 > GDRIVE_FILE_ID
+                  args: lsjson GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 > GDRIVE_FILE_META
 
             
             # ╭───────────────────────────────────────────────────────╮
@@ -221,8 +221,8 @@ jobs:
               id: rclone_file_id
               run: |
                 ls -la
-                cat GDRIVE_FILE_ID
-                echo "UUID=$(cat GDRIVE_FILE_ID | jq -r '.[].ID')" >> $GITHUB_ENV
+                GDRIVE_FILE_ID=$(cat GDRIVE_FILE_META | jq -r '.[].ID')
+                echo "GDRIVE_FILE_ID=$(echo $GDRIVE_FILE_ID" >> $GITHUB_ENV
 
             # ╭───────────────────────────────────────────────────────╮
             # │                   CREATE A RELEASE                    │
