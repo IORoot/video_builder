@@ -218,7 +218,7 @@ jobs:
                   echo "rclone"
                   GDRIVE_FILE_ID=$(rclone lsjson GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 | jq -r '.[].ID' )
                   echo "GITHUB_ENV"
-                  echo "GDRIVE_FILE_ID=$GDRIVE_FILE_ID" >> $GITHUB_ENV
+                  echo "GDRIVE_FILE_ID=${GDRIVE_FILE_ID}" >> $GITHUB_ENV
 
 
             # ╭───────────────────────────────────────────────────────╮
