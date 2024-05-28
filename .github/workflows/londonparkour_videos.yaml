@@ -104,7 +104,8 @@ jobs:
               run: |
                   echo ${SETTINGS} | base64 --decode > env.json
                   json_data=$(cat env.json)
-                  echo "$json_data" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+                  echo "$json_data" | jq -r 'to_entries[] | "\(.key)=\(.value)"' > env.vars
+                  cat env.vars
 
 
 
