@@ -23,18 +23,6 @@ env:
   REPEAT: ${{ github.event.client_payload.pppff_repeats }}
   SETTINGS: ${{ github.event.client_payload.pppff_settings }}
 
-  # RELEASE_TARGET: ${{ github.event.client_payload.pppff_release_rest_api_url }}
-  # RELEASE_TOKEN: ${{ github.event.client_payload.pppff_release_rest_api_token }}
-  # RELEASE_SCHEDULE: ${{ github.event.client_payload.pppff_release_schedule }}
-
-  # GDRIVE_ENABLE: ${{ github.event.client_payload.pppff_google_drive }}
-  # GDRIVE_FOLDER: ${{ github.event.client_payload.pppff_google_drive_output_folder }}
-
-  # WEBSERVER_ENABLE: ${{ github.event.client_payload.pppff_webserver }}
-  # WEBSERVER_DOMAIN: ${{ github.event.client_payload.pppff_ssh_server_domain }}
-  # WEBSERVER_FOLDER: ${{ github.event.client_payload.pppff_target_upload_folder }}
-  # WEBSERVER_OUTPUT: ${{ github.event.client_payload.pppff_root_output_url }}
-
 jobs:
 
     # ╭───────────────────────────────────────────────────────────────────────────╮
@@ -93,8 +81,7 @@ jobs:
             # │                                                                          │░
             # ╰░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-            # - name: Setup upterm session
-            #   uses: lhotari/action-upterm@v1
+            
 
             # ╭───────────────────────────────────────────────────────╮
             # │           SETUP ALL ENVIRONMENT VARIABLES             │
@@ -111,10 +98,6 @@ jobs:
                       echo "$line" >> $GITHUB_ENV
                   done < env.vars
 
-                  echo ${{ env.pppff_release_schedule }}
-
-
-     
 
 
             # ╭───────────────────────────────────────────────────────╮
@@ -124,8 +107,6 @@ jobs:
               id: generate_uuid
               run: |
                   echo "UUID=$(openssl rand -hex 6)" >> $GITHUB_ENV
-                  
-                  echo ${{ env.pppff_release_schedule }}
 
 
 
@@ -229,33 +210,33 @@ jobs:
             # │        Copy the video and thumbnail to server         │
             # ╰───────────────────────────────────────────────────────╯
             - name: Copy Video to Server
-              if: env.WEBSERVER_ENABLE == 'true'
+              if: env.pppff_webserver == 'true'
               run: |
 
-                  if [ -z "${{ env.WEBSERVER_DOMAIN }}" ]; then
-                    echo "WEBSERVER_DOMAIN is not set or is empty. Exiting."
+                  if [ -z "${{ env.pppff_ssh_server_domain }}" ]; then
+                    echo "pppff_ssh_server_domain is not set or is empty. Exiting."
                     exit 1
                   fi
 
-                  if [ -z "${{ env.WEBSERVER_FOLDER }}" ]; then
-                    echo "WEBSERVER_FOLDER is not set or is empty. Exiting."
+                  if [ -z "${{ env.pppff_target_upload_folder }}" ]; then
+                    echo "pppff_target_upload_folder is not set or is empty. Exiting."
                     exit 1
                   fi
 
-                  if [ -z "${{ env.WEBSERVER_OUTPUT }}" ]; then
-                    echo "WEBSERVER_OUTPUT is not set or is empty. Exiting."
+                  if [ -z "${{ env.pppff_root_output_url }}" ]; then
+                    echo "pppff_root_output_url is not set or is empty. Exiting."
                     exit 1
                   fi
                   
                   mkdir ~/.ssh
-                  ssh-keyscan -H ${{env.WEBSERVER_DOMAIN}} >> ~/.ssh/known_hosts
+                  ssh-keyscan -H ${{env.pppff_ssh_server_domain}} >> ~/.ssh/known_hosts
 
                   SOURCE_DIR="./processed_video"
-                  TARGET_DIR="${WEBSERVER_FOLDER}/${{ github.event.action }}"
+                  TARGET_DIR="${pppff_target_upload_folder}/${{ github.event.action }}"
 
-                  sshpass -p '${{secrets.SSH_PASS}}' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{secrets.SSH_USER}}@${{env.WEBSERVER_DOMAIN}} "mkdir -p ${TARGET_DIR}"
+                  sshpass -p '${{secrets.SSH_PASS}}' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{secrets.SSH_USER}}@${{env.pppff_ssh_server_domain}} "mkdir -p ${TARGET_DIR}"
                   cd ${SOURCE_DIR}
-                  sshpass -p '${{secrets.SSH_PASS}}' scp -v -p -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null * ${{secrets.SSH_USER}}@${{env.WEBSERVER_DOMAIN}}:${TARGET_DIR}
+                  sshpass -p '${{secrets.SSH_PASS}}' scp -v -p -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null * ${{secrets.SSH_USER}}@${{env.pppff_ssh_server_domain}}:${TARGET_DIR}
 
 
 
@@ -271,12 +252,12 @@ jobs:
             # │                 COPY TO GOOGLE DRIVE                  │
             # ╰───────────────────────────────────────────────────────╯
             - name: rclone copy result back to google drive
-              if: env.GDRIVE_ENABLE == 'true'
+              if: env.pppff_google_drive == 'true'
               uses: wei/rclone@v1
               env:
                   RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
               with:
-                  args: copy ./processed_video GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/
+                  args: copy ./processed_video GDrive:${{ env.pppff_google_drive_output_folder }}/${{ github.event.action }}/${UUID}/
 
 
 
@@ -284,12 +265,12 @@ jobs:
             # │       USE RCLONE TO GET FILE_ID OF GDRIVE FILE        │
             # ╰───────────────────────────────────────────────────────╯
             - name: get gdrive file_id
-              if: env.GDRIVE_ENABLE == 'true'
+              if: env.pppff_google_drive == 'true'
               uses: wei/rclone@v1
               env:
                   RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
               with:
-                  args: lsjson GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 > GDRIVE_FILE_META
+                  args: lsjson GDrive:${{ env.pppff_google_drive_output_folder }}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 > GDRIVE_FILE_META
 
 
 
@@ -306,18 +287,17 @@ jobs:
             # ╰───────────────────────────────────────────────────────╯
             - name: Create a Release
               run: |
-                  echo "GDRIVE_FILE_ID=$(cat GDRIVE_FILE_META | jq -r '.[].ID')" >> $GITHUB_ENV
-                  echo "${{env.GDRIVE_FILE_ID}}"
+                  GDRIVE_FILE_ID=$(cat GDRIVE_FILE_META | jq -r '.[].ID')"
 
                   create_release.sh \
-                  --target ${{env.RELEASE_TARGET}} \
-                  --token ${{env.RELEASE_TOKEN}} \
-                  --schedule "${{env.RELEASE_SCHEDULE}}" \
+                  --target ${{env.pppff_release_rest_api_url}} \
+                  --token ${{env.pppff_release_rest_api_token}} \
+                  --schedule "${{env.pppff_release_schedule}}" \
                   --title "${{ github.event.action }} - ${UUID}" \
                   --content "" \
-                  --gdrive ${{env.GDRIVE_FILE_ID}} \
-                  --video ${{env.WEBSERVER_OUTPUT}}/${{ github.event.action }}/${UUID}_video.mp4 \
-                  --thumbnail ${{env.WEBSERVER_OUTPUT}}/${{ github.event.action }}/${UUID}_thumbnail.png
+                  --gdrive ${GDRIVE_FILE_ID} \
+                  --video ${{env.pppff_root_output_url}}/${{ github.event.action }}/${UUID}_video.mp4 \
+                  --thumbnail ${{env.pppff_root_output_url}}/${{ github.event.action }}/${UUID}_thumbnail.png
 
 
 
