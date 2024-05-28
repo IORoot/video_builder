@@ -19,8 +19,6 @@ env:
   # ╭──────────────────────────────────────────────────────────╮
   # │                       VARIABLES                          │
   # ╰──────────────────────────────────────────────────────────╯
-  PAYLOAD: ${{ github.event.client_payload }}
-
   CONFIG: ${{ github.event.client_payload.pppff_control_config_b64 }}
   REPEAT: ${{ github.event.client_payload.pppff_repeats }}
   SETTINGS: ${{ github.event.client_payload.pppff_settings }}
@@ -103,7 +101,7 @@ jobs:
             - name: Setup Variables
               id: env_variables
               run: |
-                  echo ${PAYLOAD} | base64 --decode > env.json
+                  echo ${SETTINGS} | base64 --decode > env.json
                   json_data=$(cat env.json)
                   echo "$json_data" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
 
