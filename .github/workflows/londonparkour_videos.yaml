@@ -21,8 +21,9 @@ env:
   # ╰──────────────────────────────────────────────────────────╯
   PAYLOAD: ${{ github.event.client_payload }}
 
-  # CONFIG: ${{ github.event.client_payload.pppff_control_config_b64 }}
-  # REPEAT: ${{ github.event.client_payload.pppff_repeats }}
+  CONFIG: ${{ github.event.client_payload.pppff_control_config_b64 }}
+  REPEAT: ${{ github.event.client_payload.pppff_repeats }}
+  SETTINGS: ${{ github.event.client_payload.pppff_settings }}
 
   # RELEASE_TARGET: ${{ github.event.client_payload.pppff_release_rest_api_url }}
   # RELEASE_TOKEN: ${{ github.event.client_payload.pppff_release_rest_api_token }}
@@ -107,7 +108,7 @@ jobs:
                   echo "$json_data" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
 
 
-                  
+
             - name: Setup upterm session
               uses: lhotari/action-upterm@v1
 
