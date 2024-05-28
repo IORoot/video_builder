@@ -111,6 +111,8 @@ jobs:
                       echo "$line" >> $GITHUB_ENV
                   done < env.vars
 
+                  echo ${{ env.pppff_release_schedule }}
+
 
      
 
@@ -120,7 +122,10 @@ jobs:
             # ╰───────────────────────────────────────────────────────╯
             - name: Generate UUID
               id: generate_uuid
-              run: echo "UUID=$(openssl rand -hex 6)" >> $GITHUB_ENV
+              run: |
+                  echo "UUID=$(openssl rand -hex 6)" >> $GITHUB_ENV
+                  
+                  echo ${{ env.pppff_release_schedule }}
 
 
 
