@@ -107,6 +107,9 @@ jobs:
                   echo "$json_data" | jq -r 'to_entries[] | "\(.key)=\(.value)"' > env.vars
                   cat env.vars
 
+                  while IFS= read -r line; do
+                      echo "$line" >> $GITHUB_ENV
+                  done < env.vars
 
 
      
