@@ -2,9 +2,10 @@
 # │                               REQUIREMENTS                                │
 # ╰───────────────────────────────────────────────────────────────────────────╯
 #
-# Make sure the following variables are set to access your server.
-# SSH_PASS
-# SSH_USER
+# Make sure the following SECRET variables are set to access your server.
+# SSH_PASS    = Password to your server to upload video to.  
+# SSH_USER    = Username to your server to upload video to.
+# RCLONE_CONF = Configuration of rCLone to allow access to Google Drive.
 
 name: 🎬 LondonParkour Videos
 
@@ -14,19 +15,24 @@ on:
         types: [londonparkour_videos]
 
 env:
-
+  
   # ╭──────────────────────────────────────────────────────────╮
-  # │                       Variables                          │
+  # │                       VARIABLES                          │
   # ╰──────────────────────────────────────────────────────────╯
   CONFIG: ${{ github.event.client_payload.pppff_control_config_b64 }}
   REPEAT: ${{ github.event.client_payload.pppff_repeats }}
+
   RELEASE_TARGET: ${{ github.event.client_payload.pppff_release_rest_api_url }}
   RELEASE_TOKEN: ${{ github.event.client_payload.pppff_release_rest_api_token }}
   RELEASE_SCHEDULE: ${{ github.event.client_payload.pppff_release_schedule }}
+
+  GDRIVE_ENABLE: ${{ github.event.client_payload.pppff_google_drive }}
   GDRIVE_FOLDER: ${{ github.event.client_payload.pppff_google_drive_output_folder }}
-  SERVER: "media.londonparkour.com"
-  TARGET_ROOT_FOLDER: "/var/www/vhosts/media.londonparkour.com/processed"
-  OUTPUT_URL: "http://media.londonparkour.com/processed"
+
+  WEBSERVER_ENABLE: ${{ github.event.client_payload.pppff_webserver }}
+  WEBSERVER_DOMAIN: ${{ github.event.client_payload.pppff_ssh_server_domain }}
+  WEBSERVER_FOLDER: ${{ github.event.client_payload.pppff_target_upload_folder }}
+  WEBSERVER_OUTPUT: ${{ github.event.client_payload.pppff_root_output_url }}
 
 jobs:
 
@@ -77,6 +83,14 @@ jobs:
             # Use the matrix from the previous job to spin-up multiple runners
             matrix: ${{ fromJSON(needs.create_matrix.outputs.matrix) }}
         steps:
+
+
+
+            # ╭──────────────────────────────────────────────────────────────────────────╮
+            # │                                                                          │░
+            # │                                 INSTALL                                  │░
+            # │                                                                          │░
+            # ╰░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 
 
@@ -142,21 +156,22 @@ jobs:
 
 
 
-            # ╭───────────────────────────────────────────────────────╮
-            # │         Output the config for debug purposes           │
-            # ╰───────────────────────────────────────────────────────╯
-            - name: Create Config.json
-              run: |
-                  echo $CONFIG | base64 --decode > ${GITHUB_WORKSPACE}/config.json
+            # ╭──────────────────────────────────────────────────────────────────────────╮
+            # │                                                                          │░
+            # │                                SCRIPTFLOW                                │░
+            # │                                                                          │░
+            # ╰░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 
-              
+
             # ╭───────────────────────────────────────────────────────╮
             # │  Run /usr/local/bin/scriptflow.sh with the config.json  │
             # ╰───────────────────────────────────────────────────────╯
-            # export PATH to allow shell variables become environment variable for subshells to work.
             - name: Run ScriptFlow
               run: |
+
+                  echo $CONFIG | base64 --decode > ${GITHUB_WORKSPACE}/config.json
+
                   cd ${GITHUB_WORKSPACE}
                   mkdir -p ${GITHUB_WORKSPACE}/processed_video
                   export PATH=$PATH:$(pwd)
@@ -174,11 +189,63 @@ jobs:
                   ls -la ${GITHUB_WORKSPACE}/processed_video
                   
 
-             
+
+
+            # ╭──────────────────────────────────────────────────────────────────────────╮
+            # │                                                                          │░
+            # │                                WEBSERVER                                 │░
+            # │                                                                          │░
+            # ╰░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │        Copy the video and thumbnail to server         │
+            # ╰───────────────────────────────────────────────────────╯
+            - name: Copy Video to Server
+              if: env.WEBSERVER_ENABLE == 'true'
+              run: |
+
+                  if [ -z "${{ env.WEBSERVER_DOMAIN }}" ]; then
+                    echo "WEBSERVER_DOMAIN is not set or is empty. Exiting."
+                    exit 1
+                  fi
+
+                  if [ -z "${{ env.WEBSERVER_FOLDER }}" ]; then
+                    echo "WEBSERVER_FOLDER is not set or is empty. Exiting."
+                    exit 1
+                  fi
+
+                  if [ -z "${{ env.WEBSERVER_OUTPUT }}" ]; then
+                    echo "WEBSERVER_OUTPUT is not set or is empty. Exiting."
+                    exit 1
+                  fi
+                  
+                  mkdir ~/.ssh
+                  ssh-keyscan -H ${{env.WEBSERVER_DOMAIN}} >> ~/.ssh/known_hosts
+
+                  SOURCE_DIR="./processed_video"
+                  TARGET_DIR="${WEBSERVER_FOLDER}/${{ github.event.action }}"
+
+                  sshpass -p '${{secrets.SSH_PASS}}' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{secrets.SSH_USER}}@${{env.WEBSERVER_DOMAIN}} "mkdir -p ${TARGET_DIR}"
+                  cd ${SOURCE_DIR}
+                  sshpass -p '${{secrets.SSH_PASS}}' scp -v -p -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null * ${{secrets.SSH_USER}}@${{env.WEBSERVER_DOMAIN}}:${TARGET_DIR}
+
+
+
+            # ╭──────────────────────────────────────────────────────────────────────────╮
+            # │                                                                          │░
+            # │                               GOOGLE DRIVE                               │░
+            # │                                                                          │░
+            # ╰░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+
             # ╭───────────────────────────────────────────────────────╮
             # │                 COPY TO GOOGLE DRIVE                  │
             # ╰───────────────────────────────────────────────────────╯
             - name: rclone copy result back to google drive
+              if: env.GDRIVE_ENABLE == 'true'
               uses: wei/rclone@v1
               env:
                   RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
@@ -188,45 +255,32 @@ jobs:
 
 
             # ╭───────────────────────────────────────────────────────╮
-            # │        Copy the video and thumbnail to server         │
-            # ╰───────────────────────────────────────────────────────╯
-            - name: Copy Video to Server
-              run: |
-                  mkdir ~/.ssh
-                  ssh-keyscan -H ${{env.SERVER}} >> ~/.ssh/known_hosts
-
-                  SOURCE_DIR="./processed_video"
-                  TARGET_DIR="${TARGET_ROOT_FOLDER}/${{ github.event.action }}"
-
-                  sshpass -p '${{secrets.SSH_PASS}}' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{secrets.SSH_USER}}@${{env.SERVER}} "mkdir -p ${TARGET_DIR}"
-                  cd ${SOURCE_DIR}
-                  sshpass -p '${{secrets.SSH_PASS}}' scp -v -p -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null * ${{secrets.SSH_USER}}@${{env.SERVER}}:${TARGET_DIR}
-
-
-            # ╭───────────────────────────────────────────────────────╮
             # │       USE RCLONE TO GET FILE_ID OF GDRIVE FILE        │
             # ╰───────────────────────────────────────────────────────╯
             - name: get gdrive file_id
+              if: env.GDRIVE_ENABLE == 'true'
               uses: wei/rclone@v1
               env:
                   RCLONE_CONF: ${{ secrets.RCLONE_CONF }}
               with:
                   args: lsjson GDrive:${GDRIVE_FOLDER}/${{ github.event.action }}/${UUID}/${UUID}_video.mp4 > GDRIVE_FILE_META
 
-            
-            # ╭───────────────────────────────────────────────────────╮
-            # │       USE RCLONE TO GET FILE_ID OF GDRIVE FILE        │
-            # ╰───────────────────────────────────────────────────────╯            
-            - name: rclone file_id
-              id: rclone_file_id
-              run: |
-                echo "GDRIVE_FILE_ID=$(cat GDRIVE_FILE_META | jq -r '.[].ID')" >> $GITHUB_ENV
+
+
+            # ╭──────────────────────────────────────────────────────────────────────────╮
+            # │                                                                          │░
+            # │                                 RELEASE                                  │░
+            # │                                                                          │░
+            # ╰░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
 
             # ╭───────────────────────────────────────────────────────╮
             # │                   CREATE A RELEASE                    │
             # ╰───────────────────────────────────────────────────────╯
             - name: Create a Release
               run: |
+                  echo "GDRIVE_FILE_ID=$(cat GDRIVE_FILE_META | jq -r '.[].ID')" >> $GITHUB_ENV
                   echo "${{env.GDRIVE_FILE_ID}}"
 
                   create_release.sh \
@@ -236,8 +290,8 @@ jobs:
                   --title "${{ github.event.action }} - ${UUID}" \
                   --content "" \
                   --gdrive ${{env.GDRIVE_FILE_ID}} \
-                  --video ${{env.OUTPUT_URL}}/${{ github.event.action }}/${UUID}_video.mp4 \
-                  --thumbnail ${{env.OUTPUT_URL}}/${{ github.event.action }}/${UUID}_thumbnail.png
+                  --video ${{env.WEBSERVER_OUTPUT}}/${{ github.event.action }}/${UUID}_video.mp4 \
+                  --thumbnail ${{env.WEBSERVER_OUTPUT}}/${{ github.event.action }}/${UUID}_thumbnail.png
 
 
 
