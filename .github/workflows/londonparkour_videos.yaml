@@ -19,20 +19,22 @@ env:
   # ╭──────────────────────────────────────────────────────────╮
   # │                       VARIABLES                          │
   # ╰──────────────────────────────────────────────────────────╯
-  CONFIG: ${{ github.event.client_payload.pppff_control_config_b64 }}
-  REPEAT: ${{ github.event.client_payload.pppff_repeats }}
+  PAYLOAD: ${{ github.event.client_payload }}
 
-  RELEASE_TARGET: ${{ github.event.client_payload.pppff_release_rest_api_url }}
-  RELEASE_TOKEN: ${{ github.event.client_payload.pppff_release_rest_api_token }}
-  RELEASE_SCHEDULE: ${{ github.event.client_payload.pppff_release_schedule }}
+  # CONFIG: ${{ github.event.client_payload.pppff_control_config_b64 }}
+  # REPEAT: ${{ github.event.client_payload.pppff_repeats }}
 
-  GDRIVE_ENABLE: ${{ github.event.client_payload.pppff_google_drive }}
-  GDRIVE_FOLDER: ${{ github.event.client_payload.pppff_google_drive_output_folder }}
+  # RELEASE_TARGET: ${{ github.event.client_payload.pppff_release_rest_api_url }}
+  # RELEASE_TOKEN: ${{ github.event.client_payload.pppff_release_rest_api_token }}
+  # RELEASE_SCHEDULE: ${{ github.event.client_payload.pppff_release_schedule }}
 
-  WEBSERVER_ENABLE: ${{ github.event.client_payload.pppff_webserver }}
-  WEBSERVER_DOMAIN: ${{ github.event.client_payload.pppff_ssh_server_domain }}
-  WEBSERVER_FOLDER: ${{ github.event.client_payload.pppff_target_upload_folder }}
-  WEBSERVER_OUTPUT: ${{ github.event.client_payload.pppff_root_output_url }}
+  # GDRIVE_ENABLE: ${{ github.event.client_payload.pppff_google_drive }}
+  # GDRIVE_FOLDER: ${{ github.event.client_payload.pppff_google_drive_output_folder }}
+
+  # WEBSERVER_ENABLE: ${{ github.event.client_payload.pppff_webserver }}
+  # WEBSERVER_DOMAIN: ${{ github.event.client_payload.pppff_ssh_server_domain }}
+  # WEBSERVER_FOLDER: ${{ github.event.client_payload.pppff_target_upload_folder }}
+  # WEBSERVER_OUTPUT: ${{ github.event.client_payload.pppff_root_output_url }}
 
 jobs:
 
@@ -92,6 +94,22 @@ jobs:
             # │                                                                          │░
             # ╰░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
+
+
+            # ╭───────────────────────────────────────────────────────╮
+            # │           SETUP ALL ENVIRONMENT VARIABLES             │
+            # ╰───────────────────────────────────────────────────────╯
+            - name: Setup Variables
+              id: env_variables
+              run: |
+                  echo ${PAYLOAD} | base64 --decode > env.json
+                  json_data=$(cat env.json)
+                  echo "$json_data" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> $GITHUB_ENV
+
+
+                  
+            - name: Setup upterm session
+              uses: lhotari/action-upterm@v1
 
 
             # ╭───────────────────────────────────────────────────────╮
