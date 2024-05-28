@@ -81,7 +81,7 @@ jobs:
             # │                                                                          │░
             # ╰░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
-            
+
 
             # ╭───────────────────────────────────────────────────────╮
             # │           SETUP ALL ENVIRONMENT VARIABLES             │
@@ -289,7 +289,9 @@ jobs:
               run: |
                   GDRIVE_FILE_ID=$(cat GDRIVE_FILE_META | jq -r '.[].ID')"
 
-                  create_release.sh \
+                  echo $GDRIVE_FILE_ID
+
+                  echo create_release.sh \
                   --target ${{env.pppff_release_rest_api_url}} \
                   --token ${{env.pppff_release_rest_api_token}} \
                   --schedule "${{env.pppff_release_schedule}}" \
