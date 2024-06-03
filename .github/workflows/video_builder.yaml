@@ -19,6 +19,9 @@ on:
       settings:
         description: 'duration around snippet to download'  
         required: true
+      gdrive_folder:
+        description: 'Folder to download first'  
+        required: true
       return_webhook:
         description: 'Make.com webhook to trigger on finish'
 
@@ -174,6 +177,12 @@ jobs:
             # ╰░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 
 
+            - name: rclone copy videos onto runner
+              continue-on-error: true
+              run: | 
+                  rclone copy GDrive:${{ github.event.inputs.gdrive_folder }}/ . --config rclone.conf 
+                  ls -la
+
 
             # ╭───────────────────────────────────────────────────────╮
             # │  Run /usr/local/bin/scriptflow.sh with the config.json  │
@@ -313,6 +322,6 @@ jobs:
             # │     DEBUGGER - Use to SSH into the Github Runner      │
             # ╰───────────────────────────────────────────────────────╯
             # SSH ----------------------
-            - name: Setup upterm session
-              uses: lhotari/action-upterm@v1
+            # - name: Setup upterm session
+            #   uses: lhotari/action-upterm@v1
             # SSH ----------------------
