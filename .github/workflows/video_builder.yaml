@@ -22,14 +22,6 @@ on:
       return_webhook:
         description: 'Make.com webhook to trigger on finish'
 
-env:
-  
-  # ╭──────────────────────────────────────────────────────────╮
-  # │                       VARIABLES                          │
-  # ╰──────────────────────────────────────────────────────────╯
-  CONFIG: ${{ github.event.client_payload.pppff_control_config_b64 }}
-  REPEAT: ${{ github.event.client_payload.pppff_repeats }}
-  SETTINGS: ${{ github.event.client_payload.pppff_settings }}
 
 jobs:
 
