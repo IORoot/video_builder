@@ -211,6 +211,21 @@ jobs:
                   
 
 
+            # ╭──────────────────────────────────────────────────────────────────────────╮
+            # │                                                                          │░
+            # │                               GOOGLE DRIVE                               │░
+            # │                                                                          │░
+            # ╰░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+
+
+
+            - name: rclone copy result back to google drive
+              run: | 
+                  echo "${{ secrets.RCLONE_CONF_B64 }}" | base64 --decode > rclone.conf
+                  mkdir videos
+                  mv *.mp4 videos
+                  rclone copy ./videos/ GDrive:${{ github.event.inputs.gdrive_folder }}/ --config rclone.conf 
+
 
             # ╭──────────────────────────────────────────────────────────────────────────╮
             # │                                                                          │░
@@ -246,25 +261,7 @@ jobs:
             #       sshpass -p '${{secrets.SSH_PASS}}' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{secrets.SSH_USER}}@${{env.ssh_server}} "mkdir -p ${TARGET_DIR}"
             #       cd ${SOURCE_DIR}
             #       sshpass -p '${{secrets.SSH_PASS}}' scp -v -p -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null * ${{secrets.SSH_USER}}@${{env.ssh_server}}:${TARGET_DIR}
-
-
-
-            # ╭──────────────────────────────────────────────────────────────────────────╮
-            # │                                                                          │░
-            # │                               GOOGLE DRIVE                               │░
-            # │                                                                          │░
-            # ╰░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-
-
-
-            - name: rclone copy result back to google drive
-              run: | 
-                  echo "${{ secrets.RCLONE_CONF_B64 }}" | base64 --decode > rclone.conf
-                  mkdir videos
-                  mv *.mp4 videos
-                  rclone copy ./videos/ GDrive:${{ github.event.inputs.gdrive_folder }}/ --config rclone.conf 
-
-
+      
 
             # ╭──────────────────────────────────────────────────────────────────────────╮
             # │                                                                          │░
