@@ -1,24 +1,9 @@
 {
 
-	"ff_download": {
-		"description": "Download 8 Random Teen videos",
-		"urlsource": "http://media.londonparkour.com/clips_teens/filelist.txt",
-		"output": "download.mp4",
-		"strategy": "~4"
-	},
-
-	"ff_thumbnail": {
-		"description": "Make a thumbnail (should not be last step)",
-		"input": "1_download.mp4",
-		"output": "thumbnail.png",
-		"count": "1"
-	},
-
-	"ff_blur": {
-		"description": "Blur the square",
-		"input": "1_download.mp4",
-		"strength": "20",
-        "output": "output.mp4"
+	"ff_concat": {
+		"description": "Put all Videos together",
+		"input": "./videos",
+		"output": "output.mp4"
 	}
 
 }
