@@ -129,8 +129,9 @@ jobs:
               continue-on-error: true
               run: | 
                   echo "${{ secrets.RCLONE_CONF_B64 }}" | base64 --decode > rclone.conf
-                  rclone copy GDrive:${{ github.event.inputs.gdrive_folder }}/ . --config rclone.conf 
-                  ls -la
+                  mkdir videos
+                  rclone copy GDrive:${{ github.event.inputs.gdrive_folder }}/ ./videos --config rclone.conf 
+                  ls -la ./videos
 
 
             # ╭───────────────────────────────────────────────────────╮
