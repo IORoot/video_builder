@@ -171,7 +171,7 @@ jobs:
 
             - name: rclone copy result back to google drive
               run: | 
-                  rclone copy ./videos/ GDrive:${{ github.event.inputs.gdrive_folder }}/ --config rclone.conf 
+                  rclone copy ${GITHUB_WORKSPACE}/processed_video GDrive:${{ github.event.inputs.gdrive_folder }}/ --config rclone.conf 
 
 
             # ╭──────────────────────────────────────────────────────────────────────────╮
