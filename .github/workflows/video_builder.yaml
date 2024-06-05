@@ -198,7 +198,7 @@ jobs:
                   mkdir ~/.ssh
                   ssh-keyscan -H ${{github.event.inputs.ssh_server}} >> ~/.ssh/known_hosts
 
-                  TARGET_DIR="${{ github.event.inputs.ssh_folder }}/${{ github.event.action }}"
+                  TARGET_DIR="${{ github.event.inputs.ssh_folder }}/${{ github.event.action }}/${{ github.event.inputs.gdrive_folder }}"
 
                   sshpass -p '${{secrets.SSH_PASS}}' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{secrets.SSH_USER}}@${{github.event.inputs.ssh_server}} "mkdir -p ${TARGET_DIR}"
 
