@@ -16,13 +16,16 @@ on:
       config_b64:
         description: 'Base64 configuration for scriptflow'     
         required: true
-      ssh_server:
-        description: 'Settings for SSH to Server'  
-      ssh_folder:
-        description: 'Folder to save media to'  
       gdrive_folder:
         description: 'Folder to download from'  
-        required: true
+      ssh_server:
+        description: 'Settings for SSH to Server'  
+        required: false
+        default: '' 
+      ssh_folder:
+        description: 'Folder to save media to' 
+        required: false
+        default: '' 
       return_webhook:
         description: 'Make.com webhook to trigger on finish'
 
@@ -127,6 +130,7 @@ jobs:
 
             - name: rclone copy videos onto runner
               continue-on-error: true
+              if: ${{ github.event.inputs.gdrive_folder != '' }}
               run: | 
                   echo "${{ secrets.RCLONE_CONF_B64 }}" | base64 --decode > rclone.conf
                   mkdir videos
@@ -138,7 +142,6 @@ jobs:
             # │  Run /usr/local/bin/scriptflow.sh with the config.json  │
             # ╰───────────────────────────────────────────────────────╯
             - name: Run ScriptFlow
-              continue-on-error: true
               run: |
 
                   echo ${{ github.event.inputs.config_b64 }} | base64 --decode > ${GITHUB_WORKSPACE}/config.json
@@ -170,6 +173,8 @@ jobs:
 
 
             - name: rclone copy result back to google drive
+              if: ${{ github.event.inputs.gdrive_folder != '' }}
+              continue-on-error: true
               run: | 
                   echo ${{ github.event.inputs.gdrive_folder }}
                   rclone copy ${GITHUB_WORKSPACE}/processed_video GDrive:${{ github.event.inputs.gdrive_folder }}/processed_video --config rclone.conf 
@@ -186,30 +191,40 @@ jobs:
             # ╭───────────────────────────────────────────────────────╮
             # │        Copy the video and thumbnail to server         │
             # ╰───────────────────────────────────────────────────────╯
-            # - name: Copy Video to Server
-            #   if: env.webserver == 'true'
-            #   run: |
+            - name: Copy Video to Server
+              continue-on-error: true
+              if: ${{ github.event.inputs.ssh_server != '' && github.event.inputs.ssh_folder != '' }}
+              run: |
+               
+                  mkdir ~/.ssh
+                  ssh-keyscan -H ${{github.event.inputs.ssh_server}} >> ~/.ssh/known_hosts
 
-            #       if [ -z "${{ env.ssh_server }}" ]; then
-            #         echo "ssh_server is not set or is empty. Exiting."
-            #         exit 1
-            #       fi
+                  TARGET_DIR="${{ github.event.inputs.ssh_folder }}/${{ github.event.action }}"
 
-            #       if [ -z "${{ env.ssh_folder }}" ]; then
-            #         echo "ssh_folder is not set or is empty. Exiting."
-            #         exit 1
-            #       fi
-                  
-            #       mkdir ~/.ssh
-            #       ssh-keyscan -H ${{env.ssh_server}} >> ~/.ssh/known_hosts
+                  sshpass -p '${{secrets.SSH_PASS}}' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{secrets.SSH_USER}}@${{github.event.inputs.ssh_server}} "mkdir -p ${TARGET_DIR}"
 
-            #       SOURCE_DIR="./processed_video"
-            #       TARGET_DIR="${ssh_folder}/${{ github.event.action }}"
-
-            #       sshpass -p '${{secrets.SSH_PASS}}' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{secrets.SSH_USER}}@${{env.ssh_server}} "mkdir -p ${TARGET_DIR}"
-            #       cd ${SOURCE_DIR}
-            #       sshpass -p '${{secrets.SSH_PASS}}' scp -v -p -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null * ${{secrets.SSH_USER}}@${{env.ssh_server}}:${TARGET_DIR}
+                  cd ./processed_video
+                  sshpass -p '${{secrets.SSH_PASS}}' scp -v -p -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null * ${{secrets.SSH_USER}}@${{github.event.inputs.ssh_server}}:${TARGET_DIR}
       
+
+
+            # ╭──────────────────────────────────────────────────────────────────────────╮
+            # │                                                                          │░
+            # │               Once the results are complete, send webhook                │░
+            # │                                                                          │░
+            # ╰░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+        
+        
+        
+            - name: Trigger Return Webhook
+              continue-on-error: true
+              run: |
+                curl -X POST \
+                  -H "Content-Type: text/plain" \
+                  -d "${{ github.event.inputs.gdrive_folder }}/processed_video/${UUID}_video.mp4" \
+                  ${{ github.event.inputs.return_webhook }}
+
+
 
             # ╭──────────────────────────────────────────────────────────────────────────╮
             # │                                                                          │░
@@ -229,14 +244,14 @@ jobs:
             #       echo $GDRIVE_FILE_ID
 
             #       create_release.sh \
-            #       --target ${{env.release_rest_api_url}} \
-            #       --token ${{env.release_rest_api_token}} \
-            #       --schedule "${{env.release_schedule}}" \
+            #       --target ${{github.event.inputs.release_rest_api_url}} \
+            #       --token ${{github.event.inputs.release_rest_api_token}} \
+            #       --schedule "${{github.event.inputs.release_schedule}}" \
             #       --title "${{ github.event.action }} - ${UUID}" \
             #       --content "" \
             #       --gdrive ${GDRIVE_FILE_ID} \
-            #       --video ${{env.output_url}}/${{ github.event.action }}/${UUID}_video.mp4 \
-            #       --thumbnail ${{env.output_url}}/${{ github.event.action }}/${UUID}_thumbnail.png
+            #       --video ${{github.event.inputs.output_url}}/${{ github.event.action }}/${UUID}_video.mp4 \
+            #       --thumbnail ${{github.event.inputs.output_url}}/${{ github.event.action }}/${UUID}_thumbnail.png
 
 
 
