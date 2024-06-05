@@ -259,6 +259,6 @@ jobs:
             # │     DEBUGGER - Use to SSH into the Github Runner      │
             # ╰───────────────────────────────────────────────────────╯
             # SSH ----------------------
-            - name: Setup upterm session
-              uses: lhotari/action-upterm@v1
+            # - name: Setup upterm session
+            #   uses: lhotari/action-upterm@v1
             # SSH ----------------------
